@@ -50,8 +50,8 @@ do
     # 🎤 VOICE INPUT COMMAND
     # -------------------------
     if [[ "$input" == "voice" ]]; then
-        echo "BOB: Listening for 5 seconds... 🎤"
-        arecord -d 5 -f cd "$SCRIPT_DIR/input.wav" 2>/dev/null
+        echo "BOB: Listening... 🎤"
+        "$SCRIPT_DIR/bobenv/bin/python" "$SCRIPT_DIR/bob_record.py" "$SCRIPT_DIR/input.wav"
         echo "BOB: Processing speech... 🧠"
         input=$("$SCRIPT_DIR/bobenv/bin/python" "$SCRIPT_DIR/bob_hear.py" "$SCRIPT_DIR/input.wav")
         

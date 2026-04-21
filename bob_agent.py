@@ -3,6 +3,11 @@ import subprocess
 import requests
 import os
 import re
+import platform
+try:
+    import psutil
+except ImportError:
+    psutil = None
 
 # -------- MEMORY --------
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -98,13 +103,23 @@ def get_weather(city=""):
 
 def get_system_info():
     try:
-        uptime = subprocess.run(["uptime", "-p"], capture_output=True, text=True).stdout.strip()
-        ram = subprocess.run(["free", "-h"], capture_output=True, text=True).stdout.splitlines()[1]
-        disk = subprocess.run(["df", "-h", "/"], capture_output=True, text=True).stdout.splitlines()[1]
-        cpu = subprocess.run(["top", "-bn1"], capture_output=True, text=True).stdout.splitlines()[2]
-        os_info = subprocess.run(["grep", "PRETTY_NAME", "/etc/os-release"], capture_output=True, text=True).stdout.split("=")[1].strip().replace('"', '')
-        
-        return f"OS: {os_info}\nUptime: {uptime}\nRAM: {ram}\nDisk: {disk}\nCPU: {cpu}"
+        info = f"OS: {platform.system()} {platform.release()}\n"
+        if psutil:
+            cpu_usage = psutil.cpu_percent(interval=1)
+            memory = psutil.virtual_memory()
+            disk = psutil.disk_usage('/')
+            
+            info += f"CPU Usage: {cpu_usage}%\n"
+            info += f"RAM: {memory.percent}% used ({memory.available // (1024**2)}MB free)\n"
+            info += f"Disk: {disk.percent}% used ({disk.free // (1024**3)}GB free)"
+        else:
+            # Fallback for Linux if psutil is not installed (though it should be)
+            if platform.system() == "Linux":
+                uptime = subprocess.run(["uptime", "-p"], capture_output=True, text=True).stdout.strip()
+                info += f"Uptime: {uptime}"
+            else:
+                info += "Install 'psutil' for detailed system info."
+        return info
     except Exception as e:
         return f"Error gathering system info: {e}"
 
