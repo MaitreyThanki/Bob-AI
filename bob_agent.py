@@ -71,16 +71,30 @@ def write_file(path, content):
 
 # -------- AI (OLLAMA) --------
 def ask_ai(prompt):
+    ollama_url = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
     try:
-        result = subprocess.run(
-            ["ollama", "run", "llama3", prompt],
-            capture_output=True,
-            text=True,
-            env={**os.environ, "TERM": "dumb"}
+        response = requests.post(
+            f"{ollama_url}/api/generate",
+            json={
+                "model": "llama3",
+                "prompt": prompt,
+                "stream": False
+            }
         )
-        return result.stdout.strip()
+        response.raise_for_status()
+        return response.json().get("response", "").strip()
     except Exception as e:
-        return f"Error connecting to AI: {e}"
+        # Fallback to subprocess if API fails and we are not in Docker (optional, but let's keep it simple)
+        try:
+            result = subprocess.run(
+                ["ollama", "run", "llama3", prompt],
+                capture_output=True,
+                text=True,
+                env={**os.environ, "TERM": "dumb"}
+            )
+            return result.stdout.strip()
+        except:
+            return f"Error connecting to AI: {e}"
 
 # -------- TOOLS: EXTERNAL --------
 

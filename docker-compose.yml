@@ -1,0 +1,25 @@
+services:
+  bob-api:
+    build: .
+    container_name: bob-api
+    network_mode: host
+    environment:
+      - OLLAMA_BASE_URL=http://127.0.0.1:11434
+    volumes:
+      - ./memory.txt:/app/memory.txt:Z
+    restart: always
+
+  open-webui:
+    image: ghcr.io/open-webui/open-webui:main
+    container_name: open-webui
+    network_mode: host
+    environment:
+      - OPENAI_API_BASE_URL=http://127.0.0.1:8080/v1
+      - OPENAI_API_KEY=bob-secret
+      - PORT=3000
+    volumes:
+      - open-webui:/app/backend/data
+    restart: always
+
+volumes:
+  open-webui:

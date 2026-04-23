@@ -3,9 +3,12 @@
 BOB is a custom-built, local AI executive assistant designed to run directly in the Linux terminal. It combines the reasoning power of **Ollama (llama3)** with practical system tools and voice capabilities.
 
 ### Technologies & Architecture
-- **Core Logic:** Python-based agent (`bob_agent.py`) using a "Tool Controller" architecture to autonomously handle file operations, news fetching, and weather reports.
-- **Frontend:** Interactive Bash wrapper (`bob.sh`) for standard CLI use and a specialized listener (`bob_listen.sh`) for hands-free wake-word activation.
+- **Core Logic:** Python-based agent (`bob_agent.py`) using a "Tool Controller" architecture. Now supports both subprocess CLI and HTTP API for Ollama connectivity.
+- **Frontend:** 
+  - **CLI:** Interactive Bash wrapper (`bob.sh`) and listener (`bob_listen.sh`).
+  - **Web:** Open WebUI integrated via Docker.
 - **AI Engine:** Ollama running `llama3` locally.
+- **API Bridge:** FastAPI-based `bob_api.py` providing an OpenAI-compatible endpoint.
 - **Voice Stack:** `SpeechRecognition` (Google API) for STT and `pyttsx3` for TTS.
 - **Data Persistence:** A simple, AI-managed `memory.txt` file for long-term user context.
 
@@ -13,24 +16,15 @@ BOB is a custom-built, local AI executive assistant designed to run directly in 
 
 ### Prerequisites
 - **Ollama:** Must be installed and running with the `llama3` model (`ollama run llama3`).
-- **System Tools:** `arecord` (part of `alsa-utils`) for audio recording and `portaudio-devel` for audio headers.
+- **System Tools:** `arecord` (part of `alsa-utils`) and `portaudio-devel`.
+- **Docker:** Required for Web UI deployment.
 - **Environment:** A Python virtual environment located at `./bobenv/`.
 
 ### Commands
-- **Start Interactive Session:** 
-  ```bash
-  ./bob.sh
-  ```
-  (Shortcut: `bob`)
-- **Start Hands-Free Mode:** 
-  ```bash
-  ./bob_listen.sh
-  ```
-  (Shortcut: `bob-listen`)
-- **Dependencies:**
-  ```bash
-  source bobenv/bin/activate && pip install -r requirements.txt
-  ```
+- **Start Interactive Session:** `./bob.sh`
+- **Start Hands-Free Mode:** `./bob_listen.sh`
+- **Start Docker Web UI:** `sudo docker compose up -d`
+- **Dependencies:** `source bobenv/bin/activate && pip install -r requirements.txt`
 
 ## Development Conventions
 

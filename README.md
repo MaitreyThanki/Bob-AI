@@ -74,6 +74,18 @@ To have BOB listen for a wake word ("Hey Bob"):
 - `What is the weather in London?`: Example of tool use.
 - `Check my system status`: Example of system monitoring.
 
+### Docker Deployment 🐳 (Optional UI)
+You can run BOB with a modern web interface using Docker and Open WebUI:
+1. **Prerequisites:** Ensure Docker and Docker Compose are installed.
+2. **Start Services:**
+   ```bash
+   sudo docker compose up -d
+   ```
+3. **Access:**
+   - **Web UI:** [http://localhost:3000](http://localhost:3000)
+   - **BOB API:** [http://localhost:8080](http://localhost:8080)
+   *Note: On Fedora/RHEL, SELinux is handled via the `:Z` volume flag in the compose file.*
+
 ---
 
 ## Technical Details
