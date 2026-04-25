@@ -1,99 +1,46 @@
-# BOB AI Assistant 🤖
+# BOB AI Assistant (TUI Edition)
 
-BOB is a custom-built, local AI executive assistant designed to run directly in your terminal. It combines the reasoning power of **Ollama (llama3)** with practical system tools and voice capabilities.
+BOB is a custom-built, local AI executive assistant designed to run directly in your terminal with a professional Textual User Interface (TUI). It combines the reasoning power of **Ollama (Gemma)** with practical system tools and voice capabilities.
 
 ## Features
-- **Local AI:** Powered by Ollama (llama3), ensuring privacy and offline capability.
-- **Tool Integration:** Can list files, read/write files, check weather, fetch news, and monitor system status.
-- **Voice Support:** Speech-to-Text (STT) and Text-to-Speech (TTS) integration.
-- **Memory:** Remembers user facts and preferences over time.
-- **Cross-Platform:** Supports both Linux and Windows.
-
----
-
-## Prerequisites
-
-### 1. Ollama
-Install Ollama and download the `llama3` model:
-- **Download:** [ollama.com](https://ollama.com)
-- **Run Model:** `ollama run llama3`
-
-### 2. Python
-Ensure you have Python 3.8+ installed.
-
----
+- **Local AI:** Powered by Ollama (`gemma4:e4b` by default), ensuring privacy and offline capability.
+- **TUI Interface:** Beautifully formatted terminal experience using the `rich` library.
+- **Voice Support:** Speak to BOB and hear responses back.
+- **Tool Integration:** BOB can read/write files, check weather, news, and system stats.
+- **Memory:** Remembers user preferences and facts across sessions.
 
 ## Installation
 
-### Linux 🐧
-1. **System Dependencies:**
-   ```bash
-   sudo apt update
-   sudo apt install portaudio19-dev python3-pyaudio
-   ```
-2. **Setup Virtual Environment:**
-   ```bash
-   python3 -m venv bobenv
-   source bobenv/bin/activate
-   pip install -r requirements.txt
-   ```
-3. **Make Executable:**
-   ```bash
-   chmod +x bob.sh bob_listen.sh
-   ```
+### 1. Prerequisites
+- **Ollama:** Install from [ollama.com](https://ollama.com).
+- **Python 3.10+**
+- **System Tools:** `arecord` (part of `alsa-utils`) for voice recording on Linux.
 
-### Windows 🪟
-1. **Setup Environment:**
-   ```powershell
-   python -m venv bobenv
-   .\bobenv\Scripts\activate
-   pip install -r requirements.txt
+### 2. Setup
+1. Clone the repository and navigate to the folder.
+2. Download the AI model:
+   ```bash
+   ollama pull gemma4:e4b
    ```
-   *Note: If `pyaudio` fails to install, you may need to download a pre-compiled wheel or install "Build Tools for Visual Studio".*
-
----
+3. Run the installer/launcher:
+   ```bash
+   chmod +x bob.sh
+   ./bob.sh
+   ```
+   *Note: BOB will automatically create a `memory.txt` file to store personal facts. This file is ignored by Git to protect your privacy.*
 
 ## Usage
+Run `./bob.sh` to start the assistant.
 
-### Interactive Mode
-- **Linux:** `./bob.sh`
-- **Windows:** `bob.bat`
-
-Type your command or just say **"voice"** to trigger voice input.
-
-### Hands-Free Mode (Linux Only)
-To have BOB listen for a wake word ("Hey Bob"):
-```bash
-./bob_listen.sh
-```
-
-### Key Commands
-- `exit`: Close the assistant.
+### Commands
+- `voice`: Activate voice recognition to speak your command.
 - `clear`: Clear the terminal screen.
-- `voice`: Activate 5-second voice recording.
-- `What is the weather in London?`: Example of tool use.
-- `Check my system status`: Example of system monitoring.
+- `exit`: Close the assistant.
+- `downloads`, `documents`, `desktop`: Open respective system folders.
 
-### Docker Deployment 🐳 (Optional UI)
-You can run BOB with a modern web interface using Docker and Open WebUI:
-1. **Prerequisites:** Ensure Docker and Docker Compose are installed.
-2. **Start Services:**
-   ```bash
-   sudo docker compose up -d
-   ```
-3. **Access:**
-   - **Web UI:** [http://localhost:3000](http://localhost:3000)
-   - **BOB API:** [http://localhost:8080](http://localhost:8080)
-   *Note: On Fedora/RHEL, SELinux is handled via the `:Z` volume flag in the compose file.*
-
----
-
-## Technical Details
-- **Core Agent:** `bob_agent.py`
-- **Voice Input:** `bob_record.py` & `bob_hear.py`
-- **Voice Output:** `bob_speak.py`
-- **Memory:** `memory.txt`
-- **API (Optional):** `bob_api.py` (FastAPI wrapper)
-
-## License
-MIT
+## Customization
+You can change the AI model by setting the `BOB_MODEL` environment variable:
+```bash
+export BOB_MODEL="gemma2:9b"
+./bob.sh
+```

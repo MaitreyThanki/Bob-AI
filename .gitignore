@@ -1,0 +1,13 @@
+# Local user data
+memory.txt
+poem.txt
+input.wav
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+bobenv/
+
+# OS
+.DS_Store
