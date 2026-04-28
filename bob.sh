@@ -16,5 +16,10 @@ if ! $PYTHON_EXEC -c "import rich" &>/dev/null; then
     $PYTHON_EXEC -m pip install rich
 fi
 
+# Load .env variables if file exists
+if [ -f "$SCRIPT_DIR/.env" ]; then
+    export $(grep -v '^#' "$SCRIPT_DIR/.env" | xargs)
+fi
+
 # Run the TUI
 $PYTHON_EXEC "$SCRIPT_DIR/bob_tui.py"

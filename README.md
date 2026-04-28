@@ -39,7 +39,18 @@ Run `./bob.sh` to start the assistant.
 - `downloads`, `documents`, `desktop`: Open respective system folders.
 
 ## Customization
-You can change the AI model by setting the `BOB_MODEL` environment variable:
+BOB uses environment variables for configuration. You can create a `.env` file in the project root to set these:
+
+```env
+CURRENTS_API_KEY=your_key_here
+BOB_MODEL="gemma4:e4b"
+```
+
+### News API
+BOB uses the **Currents API** for latest news. You can get a free key at [currentsapi.services](https://currentsapi.services/).
+
+### AI Model
+You can change the AI model by setting the `BOB_MODEL` environment variable in your `.env` or exporting it:
 ```bash
 export BOB_MODEL="gemma2:9b"
 ./bob.sh

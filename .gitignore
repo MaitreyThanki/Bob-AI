@@ -1,4 +1,5 @@
 # Local user data
+.env
 memory.txt
 poem.txt
 input.wav

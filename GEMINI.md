@@ -32,6 +32,7 @@ BOB is a custom-built, local AI executive assistant designed to run directly in 
 - **Autonomous Reasoning:** 
   1. **Tool Selection:** AI evaluates input to decide if a tool (LIST, READ, WRITE, WEATHER, NEWS, SYSTEM) is needed.
   2. **Final Response:** AI generates plain-text response based on tool output and memory.
+- **News Service:** Powered by Currents API. Requires `CURRENTS_API_KEY` in `.env`.
 - **Formatting:** Responses are rendered using Markdown via the `rich` library.
 
 ### Voice Protocol

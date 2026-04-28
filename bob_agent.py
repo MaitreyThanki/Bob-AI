@@ -4,6 +4,7 @@ import requests
 import os
 import re
 import platform
+import threading
 try:
     import psutil
 except ImportError:
@@ -29,10 +30,11 @@ def save_memory(new_info):
     return True
 
 def automate_memory(user_input, ai_response):
-    # ... (code for automate_memory)
-    # I will keep the previous implementation of automate_memory here for context
-    current_memory = load_memory()
-    prompt = f"""
+    """Processes memory in a background thread to avoid user-facing latency."""
+    def _task():
+        try:
+            current_memory = load_memory()
+            prompt = f"""
 [SYSTEM] You are BOB's Memory Processor.
 Your task is to extract NEW, UNIQUE, and HIGH-SIGNAL facts about the user from the conversation.
 
@@ -51,11 +53,16 @@ User: {user_input}
 AI: {ai_response}
 
 New Unique Fact:"""
-    extracted = ask_ai(prompt).strip()
-    if extracted and extracted.upper() != "NONE" and len(extracted) < 150:
-        # Final sanity check to avoid junk
-        if "User " in extracted and not any(x in extracted.lower() for x in ["interact", "talk", "none", "nothing"]):
-            save_memory(extracted)
+            extracted = ask_ai(prompt).strip()
+            if extracted and extracted.upper() != "NONE" and len(extracted) < 150:
+                # Final sanity check to avoid junk
+                if "User " in extracted and not any(x in extracted.lower() for x in ["interact", "talk", "none", "nothing"]):
+                    save_memory(extracted)
+        except:
+            pass # Silent failure for background memory processing
+
+    thread = threading.Thread(target=_task, daemon=True)
+    thread.start()
 
 def consolidate_memory():
     """Reads memory.txt and asks the AI to deduplicate and clean it."""
@@ -168,21 +175,31 @@ def ask_ai(prompt):
 # -------- TOOLS: EXTERNAL --------
 
 def get_news():
+    api_key = os.getenv("CURRENTS_API_KEY")
+    if not api_key:
+        return "News API key missing. Please set CURRENTS_API_KEY in your .env file."
+    
     try:
-        url = "https://newsapi.org/v2/top-headlines?country=us&apiKey=801ef43486bc40309fdbba06460a9e05"
-        data = requests.get(url).json()
-        headlines = ["- " + a["title"] for a in data.get("articles", [])[:5]]
+        url = "https://api.currentsapi.services/v1/latest-news"
+        headers = {
+            "Authorization": api_key
+        }
+        response = requests.get(url, headers=headers)
+        data = response.json()
+        headlines = ["- " + a["title"] for a in data.get("news", [])[:5]]
         return "\n".join(headlines)
     except:
         return "Unable to fetch news right now."
 
 def get_weather(city=""):
     try:
+        # Use a common browser User-Agent to ensure wttr.in responds correctly
+        headers = {"User-Agent": "Mozilla/5.0"}
         url = f"https://wttr.in/{city}?format=3"
-        response = requests.get(url)
+        response = requests.get(url, headers=headers, timeout=10)
         return response.text.strip() if response.status_code == 200 else "Weather unavailable."
-    except:
-        return "Weather service error."
+    except Exception as e:
+        return f"Weather service error: {e}"
 
 def get_system_info():
     try:
@@ -221,13 +238,18 @@ Available Tools:
 - LIST: (lists files)
 - READ: <filename> (reads file)
 - WRITE: <filename>|<content> (writes to file)
-- WEATHER: <city> (checks weather)
+- WEATHER: <city> (checks weather. Use "WEATHER:" for current location)
 - NEWS: (gets latest news)
 - SYSTEM: (checks system status like CPU, RAM, Uptime)
 - NONE: (no tool needed)
 
+Rules:
+- Output ONLY the command.
+- For weather in a specific city, use "WEATHER: CityName".
+- For general weather or current location, use "WEATHER:".
+
 User: "{user_input}"
-Decision (Output ONLY the command):"""
+Decision:"""
 
     decision = ask_ai(tool_prompt).strip()
     
@@ -248,7 +270,8 @@ Decision (Output ONLY the command):"""
         except: tool_result = "Error in write format."
     elif decision.startswith("WEATHER"):
         if status_callback: status_callback("Checking weather... 🌦️")
-        city = decision.replace("WEATHER:", "").strip()
+        # Remove "WEATHER:" or "WEATHER" prefix to get the actual city
+        city = decision.replace("WEATHER:", "").replace("WEATHER", "").strip()
         tool_result = get_weather(city)
     elif decision.startswith("NEWS"):
         if status_callback: status_callback("Fetching news... 📰")
@@ -301,13 +324,18 @@ Available Tools:
 - LIST: (lists files)
 - READ: <filename> (reads file)
 - WRITE: <filename>|<content> (writes to file)
-- WEATHER: <city> (checks weather)
+- WEATHER: <city> (checks weather. Use "WEATHER:" for current location)
 - NEWS: (gets latest news)
 - SYSTEM: (checks system status like CPU, RAM, Uptime)
 - NONE: (no tool needed)
 
+Rules:
+- Output ONLY the command.
+- For weather in a specific city, use "WEATHER: CityName".
+- For general weather or current location, use "WEATHER:".
+
 User: "{user_input}"
-Decision (Output ONLY the command):"""
+Decision:"""
 
     decision = ask_ai(tool_prompt).strip()
     
@@ -324,7 +352,7 @@ Decision (Output ONLY the command):"""
             tool_result = write_file(filename.strip(), content.strip())
         except: tool_result = "Error in write format."
     elif decision.startswith("WEATHER"):
-        city = decision.replace("WEATHER:", "").strip()
+        city = decision.replace("WEATHER:", "").replace("WEATHER", "").strip()
         tool_result = get_weather(city)
     elif decision.startswith("NEWS"):
         tool_result = get_news()
